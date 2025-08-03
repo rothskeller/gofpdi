@@ -849,7 +849,7 @@ func (this *PdfReader) readXref() error {
 					// Continue reading xref stream data now that it is confirmed that it is an xref stream
 
 					// Check for /DecodeParms
-					paethDecode := false
+					pngFilter := false
 					if _, ok := v.Dictionary["/DecodeParms"]; ok {
 						predictor := 0
 
@@ -857,10 +857,10 @@ func (this *PdfReader) readXref() error {
 							predictor = v.Dictionary["/DecodeParms"].Dictionary["/Predictor"].Int
 						}
 
-						if predictor > 15 {
+						if (predictor < 0 || predictor > 2) && (predictor < 10 || predictor > 15) {
 							return errors.New("Unsupported /DecodeParms - only tested with /Columns <= 4 and /Predictor <= 12")
 						}
-						paethDecode = true
+						pngFilter = predictor >= 10
 					}
 
 					/*
@@ -995,7 +995,7 @@ func (this *PdfReader) readXref() error {
 					lastFieldSize := v.Dictionary["/W"].Array[2].Int
 
 					fieldSize := firstFieldSize + middleFieldSize + lastFieldSize
-					if paethDecode {
+					if pngFilter {
 						fieldSize++
 					}
 
@@ -1011,13 +1011,13 @@ func (this *PdfReader) readXref() error {
 							}
 						}
 
-						if paethDecode {
-							filterPaeth(result, prevRow, fieldSize)
+						if pngFilter {
+							filterPNG(result, prevRow, fieldSize)
 							copy(prevRow, result)
 						}
 
 						objectData := make([]byte, fieldSize)
-						if paethDecode {
+						if pngFilter {
 							copy(objectData, result[1:fieldSize])
 						} else {
 							copy(objectData, result[0:fieldSize])

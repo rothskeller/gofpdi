@@ -83,6 +83,25 @@ func in_array(needle interface{}, hystack interface{}) bool {
 	return false
 }
 
+func filterPNG(cdat, pdat []byte, bytesPerPixel int) {
+	switch cdat[0] {
+	case 0: // No filter
+		return
+	case 1:
+		panic("unsupported PNG filter type Sub")
+	case 2: // "Up" filter
+		for i := 1; i < len(cdat); i++ {
+			cdat[i] += pdat[i]
+		}
+	case 3:
+		panic("unsupported PNG filter type Average")
+	case 4: // Paeth filter
+		filterPaeth(cdat[1:], pdat[1:], bytesPerPixel)
+	default:
+		panic("unsupport PNG filter type")
+	}
+}
+
 // Taken from png library
 
 // intSize is either 32 or 64.
