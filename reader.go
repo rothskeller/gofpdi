@@ -873,18 +873,18 @@ func (this *PdfReader) readXref() error {
 						}
 					*/
 
-					index := make([]int, 2)
+					var index []int
 
-					// If /Index is not set, this is an error
 					if _, ok := v.Dictionary["/Index"]; ok {
 						if len(v.Dictionary["/Index"].Array) < 2 {
 							return errors.Wrap(err, "Index array does not contain 2 elements")
 						}
-
-						index[0] = v.Dictionary["/Index"].Array[0].Int
-						index[1] = v.Dictionary["/Index"].Array[1].Int
+						index = make([]int, len(v.Dictionary["/Index"].Array))
+						for i := range index {
+							index[i] = v.Dictionary["/Index"].Array[i].Int
+						}
 					} else {
-						index[0] = 0
+						index = []int{0, v.Dictionary["/Size"].Int}
 					}
 
 					prevXref := 0
@@ -902,8 +902,6 @@ func (this *PdfReader) readXref() error {
 						// Don't return an error here.  The trailer could be in another XRef stream.
 						//return errors.New("Did not set root object")
 					}
-
-					startObject := index[0]
 
 					err = this.skipWhitespace(r)
 					if err != nil {
@@ -984,7 +982,6 @@ func (this *PdfReader) readXref() error {
 
 					objPos := 0
 					objGen := 0
-					i := startObject
 
 					// Decode result with paeth algorithm
 					var result []byte
@@ -1000,7 +997,12 @@ func (this *PdfReader) readXref() error {
 					}
 
 					prevRow := make([]byte, fieldSize)
-					for {
+					for len(index) != 0 {
+						i := index[0]
+						index[0], index[1] = index[0]+1, index[1]-1
+						if index[1] == 0 {
+							index = index[2:]
+						}
 						result = make([]byte, fieldSize)
 						_, err := io.ReadFull(b, result)
 						if err != nil {
@@ -1070,6 +1072,7 @@ func (this *PdfReader) readXref() error {
 
 		return errors.New("Expected xref to start with 'xref'.  Got: " + t)
 	}
+	fmt.Fprintf(os.Stderr, "Reading cross-reference table at %d\n", this.xrefPos)
 
 	for {
 		// Next value will be the starting object id (usually 0, but not always) or the trailer
@@ -1145,6 +1148,7 @@ func (this *PdfReader) readXref() error {
 
 				// Set object id, generation, and position
 				this.xref[i][objGen] = objPos
+				fmt.Fprintf(os.Stderr, "Object ID %d gen %d is at %d.\n", i, objGen, objPos)
 			}
 		}
 	}
