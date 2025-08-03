@@ -851,12 +851,8 @@ func (this *PdfReader) readXref() error {
 					// Check for /DecodeParms
 					paethDecode := false
 					if _, ok := v.Dictionary["/DecodeParms"]; ok {
-						columns := 0
 						predictor := 0
 
-						if _, ok2 := v.Dictionary["/DecodeParms"].Dictionary["/Columns"]; ok2 {
-							columns = v.Dictionary["/DecodeParms"].Dictionary["/Columns"].Int
-						}
 						if _, ok2 := v.Dictionary["/DecodeParms"].Dictionary["/Predictor"]; ok2 {
 							predictor = v.Dictionary["/DecodeParms"].Dictionary["/Predictor"].Int
 						}
