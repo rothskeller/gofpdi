@@ -861,7 +861,7 @@ func (this *PdfReader) readXref() error {
 							predictor = v.Dictionary["/DecodeParms"].Dictionary["/Predictor"].Int
 						}
 
-						if columns > 4 || predictor > 12 {
+						if predictor > 15 {
 							return errors.New("Unsupported /DecodeParms - only tested with /Columns <= 4 and /Predictor <= 12")
 						}
 						paethDecode = true
