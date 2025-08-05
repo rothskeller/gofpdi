@@ -1320,18 +1320,20 @@ func (this *PdfReader) getPageResources(pageno int) (*PdfValue, error) {
 // Get page content and return a slice of PdfValue objects
 func (this *PdfReader) getPageContent(objSpec *PdfValue) ([]*PdfValue, error) {
 	var err error
-	var content *PdfValue
 
 	// Allocate slice
 	contents := make([]*PdfValue, 0)
 
 	if objSpec.Type == PDF_TYPE_OBJREF {
-		// If objSpec is an object reference, resolve the object and append it to contents
-		content, err = this.resolveObject(objSpec)
+		// If objSpec is an object reference, resolve the object
+		objSpec, err = this.resolveObject(objSpec)
 		if err != nil {
 			return nil, errors.Wrap(err, "Failed to resolve object")
 		}
-		contents = append(contents, content)
+	}
+	if objSpec.Type == PDF_TYPE_STREAM {
+		// If objSpec is a stream, append it to contents
+		contents = append(contents, objSpec)
 	} else if objSpec.Type == PDF_TYPE_ARRAY {
 		// If objSpec is an array, loop through the array and recursively get page content and append to contents
 		for i := 0; i < len(objSpec.Array); i++ {
