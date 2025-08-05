@@ -1330,6 +1330,7 @@ func (this *PdfReader) getPageContent(objSpec *PdfValue) ([]*PdfValue, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "Failed to resolve object")
 		}
+		objSpec = objSpec.Value
 	}
 	if objSpec.Type == PDF_TYPE_STREAM {
 		// If objSpec is a stream, append it to contents
