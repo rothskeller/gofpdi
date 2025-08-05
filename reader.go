@@ -1331,7 +1331,7 @@ func (this *PdfReader) getPageContent(objSpec *PdfValue) ([]*PdfValue, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "Failed to resolve object")
 		}
-		if content.Value.Type == PDF_TYPE_STREAM {
+		if content.Type == PDF_TYPE_STREAM {
 			contents = append(contents, content)
 		} else if content.Value.Type == PDF_TYPE_ARRAY {
 			objSpec = content.Value
