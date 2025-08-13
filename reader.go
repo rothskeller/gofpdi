@@ -1072,7 +1072,6 @@ func (this *PdfReader) readXref() error {
 
 		return errors.New("Expected xref to start with 'xref'.  Got: " + t)
 	}
-	fmt.Fprintf(os.Stderr, "Reading cross-reference table at %d\n", this.xrefPos)
 
 	for {
 		// Next value will be the starting object id (usually 0, but not always) or the trailer
@@ -1148,7 +1147,6 @@ func (this *PdfReader) readXref() error {
 
 				// Set object id, generation, and position
 				this.xref[i][objGen] = objPos
-				fmt.Fprintf(os.Stderr, "Object ID %d gen %d is at %d.\n", i, objGen, objPos)
 			}
 		}
 	}
